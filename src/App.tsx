@@ -1,6 +1,8 @@
 import {AppFooter, AppHeader, AppSidebar} from "@/components/common";
 import {ThemeProvider} from "@/components/theme-provider.tsx";
 import {SkeletonHotTopic, SkeletonNewTopic} from "@/components/skeleton";
+import {Button} from "@/components/ui";
+import {PencilLine} from "lucide-react";
 
 function App() {
 
@@ -10,6 +12,12 @@ function App() {
                 <AppHeader></AppHeader>
                 <div className="container">
                     <main className={"w-full h-full min-h-[720px] flex p-6 gap-6"}>
+                        <div className="fixed right-1/2 bottom-10 translate-x-1/2 z-20 items-center">
+                            <Button variant={"destructive"} className={"!py-5 !px-6 rounded-full"}>
+                                <PencilLine/>
+                                나만의 토픽 작성
+                            </Button>
+                        </div>
                         {/*카테고리 사이드바*/}
                         <AppSidebar/>
                         {/*토픽 콘텐츠*/}
@@ -18,7 +26,7 @@ function App() {
                             <div className={"w-full flex flex-col gap-6"}>
                                 <div className={"flex flex-col gap-1"}>
                                     <div className={"flex items-center gap-2"}>
-                                        <img src="/public/assets/fire.gif" alt="@IMG" className={"w-7 h-7"}/>
+                                        <img src="/assets/gifs/gif-001.gif" alt="@IMG" className={"w-7 h-7"}/>
                                         <h4 className={"scroll-m-20 text-xl font-semibold tracking-tight"}>
                                             HOT 토픽
                                         </h4>
@@ -37,7 +45,7 @@ function App() {
                             <div className={"w-full flex flex-col gap-6"}>
                                 <div className={"flex flex-col gap-1"}>
                                     <div className={"flex items-center gap-2"}>
-                                        <img src="/public/assets/writing-hands.gif" alt="@IMG" className={"w-7 h-7"}/>
+                                        <img src="/assets/gifs/gif-002.gif" alt="@IMG" className={"w-7 h-7"}/>
                                         <h4 className={"scroll-m-20 text-xl font-semibold tracking-tight"}>
                                             NEW 토픽
                                         </h4>
