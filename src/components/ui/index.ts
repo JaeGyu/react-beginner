@@ -25,5 +25,6 @@ export {
     FormMessage,
     FormField,
 } from './form.tsx';
+export {Checkbox} from './checkbox.tsx';
 
 
