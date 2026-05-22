@@ -1,14 +1,813 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite + React + TS</title>
-  </head>
-  <body>
-    <!-- 리액트는 SPA 구조이다. -->
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HairLog — 30초 만에 완성되는 AI 미용실 리뷰</title>
+  <meta name="description" content="남성 고객을 위한 30초 완성 AI 미용실 리뷰 생성기. 4단계 선택만으로 자연스러운 리뷰 자동 완성." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #09090b;
+      --bg-card: #18181b;
+      --bg-card2: #1c1c1f;
+      --border: rgba(255,255,255,0.07);
+      --text: #fafafa;
+      --text-muted: #a1a1aa;
+      --text-dim: #52525b;
+      --green: #34d399;
+      --green-dark: #10b981;
+      --green-glow: rgba(52,211,153,0.18);
+      --cyan: #67e8f9;
+      --radius: 1.25rem;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Noto Sans KR', sans-serif;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    /* ─── NAV ─── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1rem 2rem;
+      background: rgba(9,9,11,0.7);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-logo { display: flex; align-items: center; gap: 0.6rem; }
+    .nav-logo-icon {
+      width: 36px; height: 36px;
+      background: var(--green);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem;
+    }
+    .nav-logo span { font-weight: 900; font-size: 1.1rem; letter-spacing: -0.03em; }
+    .nav-links { display: flex; align-items: center; gap: 2rem; }
+    .nav-links a {
+      color: var(--text-muted); text-decoration: none;
+      font-size: 0.9rem; font-weight: 500;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--text); }
+    .nav-cta {
+      padding: 0.5rem 1.25rem;
+      background: var(--green);
+      color: #000;
+      border-radius: 999px;
+      font-weight: 700;
+      font-size: 0.875rem;
+      text-decoration: none;
+      transition: opacity 0.2s, transform 0.15s;
+    }
+    .nav-cta:hover { opacity: 0.85; transform: translateY(-1px); }
+
+    /* ─── HERO ─── */
+    .hero {
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 7rem 2rem 4rem;
+      text-align: center;
+      position: relative; overflow: hidden;
+    }
+    .hero-glow {
+      position: absolute;
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, var(--green-glow) 0%, transparent 70%);
+      top: 10%; left: 50%; transform: translateX(-50%);
+      pointer-events: none;
+    }
+    .hero-glow2 {
+      position: absolute;
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, rgba(103,232,249,0.08) 0%, transparent 70%);
+      bottom: 20%; right: 10%;
+      pointer-events: none;
+    }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      padding: 0.4rem 1rem;
+      background: rgba(52,211,153,0.1);
+      border: 1px solid rgba(52,211,153,0.25);
+      border-radius: 999px;
+      font-size: 0.78rem; font-weight: 700;
+      color: var(--green);
+      letter-spacing: 0.04em;
+      margin-bottom: 1.5rem;
+      animation: fadeUp 0.6s ease both;
+    }
+    .hero h1 {
+      font-size: clamp(2.5rem, 6vw, 4.5rem);
+      font-weight: 900;
+      line-height: 1.1;
+      letter-spacing: -0.04em;
+      margin-bottom: 1.5rem;
+      animation: fadeUp 0.6s 0.1s ease both;
+    }
+    .hero h1 .grad {
+      background: linear-gradient(135deg, var(--green) 0%, var(--cyan) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero-sub {
+      font-size: clamp(1rem, 2vw, 1.2rem);
+      color: var(--text-muted);
+      line-height: 1.7;
+      max-width: 520px;
+      margin: 0 auto 2.5rem;
+      font-weight: 400;
+      animation: fadeUp 0.6s 0.2s ease both;
+    }
+    .hero-actions {
+      display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; justify-content: center;
+      margin-bottom: 4rem;
+      animation: fadeUp 0.6s 0.3s ease both;
+    }
+    .btn-primary {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      padding: 0.875rem 2rem;
+      background: var(--green);
+      color: #000;
+      border-radius: 999px;
+      font-weight: 800; font-size: 1rem;
+      text-decoration: none;
+      transition: all 0.2s;
+      box-shadow: 0 0 30px var(--green-glow);
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 0 50px rgba(52,211,153,0.3); }
+    .btn-secondary {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      padding: 0.875rem 1.75rem;
+      background: transparent;
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      font-weight: 600; font-size: 0.95rem;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+    .btn-secondary:hover { border-color: rgba(255,255,255,0.2); color: var(--text); }
+
+    /* ─── MOCKUP ─── */
+    .mockup-wrap {
+      animation: fadeUp 0.8s 0.4s ease both;
+      position: relative;
+    }
+    .mockup-glow-ring {
+      position: absolute; inset: -20px;
+      border-radius: calc(var(--radius) + 20px);
+      background: transparent;
+      box-shadow: 0 0 80px 20px var(--green-glow);
+      pointer-events: none;
+    }
+    .mockup {
+      width: 320px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: 0 40px 120px rgba(0,0,0,0.6);
+      position: relative;
+    }
+    .mockup-header {
+      background: #111113;
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 1.25rem;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .mockup-logo { display: flex; align-items: center; gap: 0.5rem; }
+    .mockup-logo-icon {
+      width: 28px; height: 28px; background: #fafafa; border-radius: 7px;
+      display: flex; align-items: center; justify-content: center; font-size: 0.85rem;
+    }
+    .mockup-logo span { font-weight: 800; font-size: 0.9rem; }
+    .mockup-body { padding: 1.5rem; }
+    .mockup-step-label { font-size: 0.65rem; font-weight: 800; color: var(--green); letter-spacing: 0.1em; text-transform: uppercase; }
+    .mockup-title { font-size: 1.1rem; font-weight: 800; margin: 0.25rem 0 1rem; }
+    .mockup-chips { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 1.25rem; }
+    .chip {
+      padding: 0.35rem 0.75rem;
+      border-radius: 999px;
+      font-size: 0.72rem; font-weight: 700;
+      border: 1.5px solid var(--border);
+      color: var(--text-muted);
+    }
+    .chip.active {
+      background: #fafafa; border-color: #fafafa; color: #000;
+    }
+    .mockup-btn {
+      width: 100%; padding: 0.75rem;
+      background: #fafafa; color: #000;
+      border-radius: 0.875rem;
+      font-weight: 800; font-size: 0.85rem;
+      border: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 0.3rem;
+    }
+    .mockup-progress { padding: 0 1.25rem 1.25rem; }
+    .progress-bar-bg { height: 3px; background: rgba(255,255,255,0.08); border-radius: 999px; }
+    .progress-bar-fill { height: 100%; width: 20%; background: var(--green); border-radius: 999px; }
+
+    /* ─── STATS ─── */
+    .stats {
+      display: flex; justify-content: center; flex-wrap: wrap;
+      gap: 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+    }
+    .stat-item {
+      flex: 1; min-width: 180px;
+      padding: 2.5rem 2rem;
+      text-align: center;
+      border-right: 1px solid var(--border);
+    }
+    .stat-item:last-child { border-right: none; }
+    .stat-num {
+      font-size: 2.5rem; font-weight: 900; letter-spacing: -0.04em;
+      background: linear-gradient(135deg, var(--green), var(--cyan));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+      display: block;
+    }
+    .stat-label { font-size: 0.875rem; color: var(--text-muted); margin-top: 0.25rem; font-weight: 500; }
+
+    /* ─── SECTIONS COMMON ─── */
+    section { padding: 6rem 2rem; max-width: 1100px; margin: 0 auto; }
+    .section-badge {
+      display: inline-block;
+      font-size: 0.72rem; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--green); margin-bottom: 1rem;
+    }
+    .section-title {
+      font-size: clamp(1.75rem, 3.5vw, 2.75rem);
+      font-weight: 900; letter-spacing: -0.03em;
+      line-height: 1.2; margin-bottom: 1rem;
+    }
+    .section-sub { font-size: 1rem; color: var(--text-muted); line-height: 1.7; max-width: 520px; }
+
+    /* ─── FEATURES ─── */
+    #features { text-align: center; }
+    .features-header { margin-bottom: 3.5rem; }
+    .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; }
+    .feature-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2rem;
+      text-align: left;
+      transition: border-color 0.3s, transform 0.3s;
+      position: relative; overflow: hidden;
+    }
+    .feature-card::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(circle at 0% 0%, var(--green-glow), transparent 60%);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .feature-card:hover { border-color: rgba(52,211,153,0.3); transform: translateY(-4px); }
+    .feature-card:hover::before { opacity: 1; }
+    .feature-icon {
+      width: 48px; height: 48px;
+      background: rgba(52,211,153,0.1);
+      border: 1px solid rgba(52,211,153,0.2);
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.3rem;
+      margin-bottom: 1.25rem;
+    }
+    .feature-card h3 { font-size: 1.1rem; font-weight: 800; margin-bottom: 0.5rem; }
+    .feature-card p { font-size: 0.9rem; color: var(--text-muted); line-height: 1.7; }
+
+    /* ─── HOW IT WORKS ─── */
+    #how { display: grid; grid-template-columns: 1fr 1fr; gap: 5rem; align-items: center; }
+    .how-steps { display: flex; flex-direction: column; gap: 2rem; }
+    .how-step { display: flex; gap: 1.25rem; align-items: flex-start; }
+    .step-num {
+      flex-shrink: 0;
+      width: 40px; height: 40px;
+      background: rgba(52,211,153,0.1);
+      border: 1px solid rgba(52,211,153,0.25);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.8rem; font-weight: 900;
+      color: var(--green);
+    }
+    .step-content h4 { font-size: 1rem; font-weight: 800; margin-bottom: 0.35rem; }
+    .step-content p { font-size: 0.875rem; color: var(--text-muted); line-height: 1.65; }
+    .how-visual {
+      display: flex; flex-direction: column; gap: 1rem;
+      position: relative;
+    }
+    .how-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem 1.5rem;
+      display: flex; align-items: center; gap: 1rem;
+      transition: border-color 0.3s;
+    }
+    .how-card:hover { border-color: rgba(52,211,153,0.25); }
+    .how-card-icon { font-size: 1.3rem; width: 40px; text-align: center; }
+    .how-card-text { flex: 1; }
+    .how-card-text .label { font-size: 0.7rem; font-weight: 700; color: var(--green); letter-spacing: 0.08em; text-transform: uppercase; }
+    .how-card-text .value { font-size: 0.9rem; font-weight: 600; margin-top: 0.15rem; }
+    .how-card-chips { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-top: 0.5rem; }
+    .how-chip {
+      padding: 0.2rem 0.55rem;
+      border-radius: 999px; font-size: 0.68rem; font-weight: 700;
+      background: rgba(52,211,153,0.12); color: var(--green);
+      border: 1px solid rgba(52,211,153,0.2);
+    }
+    .how-chip.gray {
+      background: rgba(255,255,255,0.06); color: var(--text-muted);
+      border-color: var(--border);
+    }
+    .arrow-line {
+      width: 2px; height: 20px;
+      background: linear-gradient(to bottom, var(--green), transparent);
+      margin: 0 auto;
+    }
+
+    /* ─── TONES ─── */
+    #tones { text-align: center; }
+    .tones-header { margin-bottom: 3.5rem; }
+    .tones-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.25rem; }
+    .tone-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.75rem 1.5rem;
+      text-align: left;
+      transition: all 0.3s;
+      cursor: default;
+    }
+    .tone-card:hover {
+      border-color: rgba(52,211,153,0.3);
+      transform: translateY(-4px);
+      background: var(--bg-card2);
+    }
+    .tone-emoji { font-size: 2rem; margin-bottom: 0.75rem; display: block; }
+    .tone-name { font-size: 1rem; font-weight: 800; margin-bottom: 0.3rem; }
+    .tone-desc { font-size: 0.82rem; color: var(--text-muted); line-height: 1.6; margin-bottom: 1rem; }
+    .tone-sample {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 0.75rem 1rem;
+      line-height: 1.65;
+      font-style: italic;
+    }
+
+    /* ─── CTA BANNER ─── */
+    .cta-section {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 2rem 2rem 6rem;
+    }
+    .cta-card {
+      background: linear-gradient(135deg, rgba(52,211,153,0.12) 0%, rgba(103,232,249,0.08) 100%);
+      border: 1px solid rgba(52,211,153,0.2);
+      border-radius: 1.75rem;
+      padding: 4rem 3rem;
+      text-align: center;
+      position: relative; overflow: hidden;
+    }
+    .cta-card::before {
+      content: '';
+      position: absolute;
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, rgba(52,211,153,0.1), transparent 70%);
+      top: -100px; left: 50%; transform: translateX(-50%);
+      pointer-events: none;
+    }
+    .cta-card h2 {
+      font-size: clamp(1.75rem, 3.5vw, 2.5rem);
+      font-weight: 900; letter-spacing: -0.03em;
+      margin-bottom: 1rem;
+    }
+    .cta-card p { font-size: 1rem; color: var(--text-muted); margin-bottom: 2rem; line-height: 1.7; }
+
+    /* ─── FOOTER ─── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 2rem 2rem;
+      text-align: center;
+    }
+    .footer-inner { max-width: 1100px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+    .footer-logo { display: flex; align-items: center; gap: 0.5rem; }
+    .footer-logo-icon {
+      width: 28px; height: 28px; background: var(--green); border-radius: 7px;
+      display: flex; align-items: center; justify-content: center; font-size: 0.85rem;
+    }
+    .footer-logo span { font-weight: 800; font-size: 0.9rem; }
+    .footer-copy { font-size: 0.8rem; color: var(--text-dim); }
+    .footer-tag { font-size: 0.78rem; color: var(--text-dim); }
+
+    /* ─── ANIMATIONS ─── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .reveal {
+      opacity: 0; transform: translateY(28px);
+      transition: opacity 0.65s ease, transform 0.65s ease;
+    }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    /* ─── MOBILE ─── */
+    @media (max-width: 768px) {
+      nav { padding: 0.875rem 1.25rem; }
+      .nav-links { display: none; }
+      section { padding: 4rem 1.25rem; }
+      #how { grid-template-columns: 1fr; gap: 3rem; }
+      .stat-item { min-width: 140px; padding: 2rem 1.25rem; }
+      .cta-card { padding: 2.5rem 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <div class="nav-logo">
+      <div class="nav-logo-icon">✂️</div>
+      <span>HairLog</span>
+    </div>
+    <div class="nav-links">
+      <a href="#features">기능</a>
+      <a href="#how">사용법</a>
+      <a href="#tones">말투 스타일</a>
+    </div>
+    <a href="#" class="nav-cta" onclick="showComingSoon(event)">지금 사용하기 →</a>
+  </nav>
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-glow"></div>
+    <div class="hero-glow2"></div>
+
+    <div class="hero-badge">
+      ✨ AI 리뷰 생성기 &nbsp;·&nbsp; Powered by Gemini
+    </div>
+
+    <h1>
+      귀찮은 미용실 리뷰,<br />
+      <span class="grad">30초 만에 끝내세요</span>
+    </h1>
+
+    <p class="hero-sub">
+      남성 고객을 위해 만든 AI 리뷰 생성기.<br />
+      시술 선택 → 말투 선택 → 완성.<br />
+      예약 리뷰 포인트, 이제 하나도 놓치지 마세요.
+    </p>
+
+    <div class="hero-actions">
+      <a href="#" class="btn-primary" onclick="showComingSoon(event)">✂️ 리뷰 작성 시작하기</a>
+      <a href="#how" class="btn-secondary">사용 방법 보기 ↓</a>
+    </div>
+
+    <!-- App Mockup -->
+    <div class="mockup-wrap">
+      <div class="mockup-glow-ring"></div>
+      <div class="mockup">
+        <div class="mockup-header">
+          <div class="mockup-logo">
+            <div class="mockup-logo-icon">✂️</div>
+            <span>HairLog</span>
+          </div>
+        </div>
+        <div class="mockup-body">
+          <div class="mockup-step-label">Step 1</div>
+          <div class="mockup-title">어떤 머리 하셨나요?</div>
+          <div class="mockup-chips">
+            <div class="chip active">컷트</div>
+            <div class="chip active">다운펌</div>
+            <div class="chip">일반펌</div>
+            <div class="chip">염색</div>
+            <div class="chip">클리닉</div>
+          </div>
+          <div class="mockup-btn">
+            다음으로 →
+          </div>
+        </div>
+        <div class="mockup-progress">
+          <div class="progress-bar-bg">
+            <div class="progress-bar-fill"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats">
+    <div class="stat-item reveal">
+      <span class="stat-num">30초</span>
+      <span class="stat-label">평균 완성 시간</span>
+    </div>
+    <div class="stat-item reveal">
+      <span class="stat-num">4단계</span>
+      <span class="stat-label">간단한 선택만으로</span>
+    </div>
+    <div class="stat-item reveal">
+      <span class="stat-num">4가지</span>
+      <span class="stat-label">말투 스타일 선택</span>
+    </div>
+    <div class="stat-item reveal">
+      <span class="stat-num">100%</span>
+      <span class="stat-label">AI 자연어 생성</span>
+    </div>
+  </div>
+
+  <!-- FEATURES -->
+  <section id="features">
+    <div class="features-header reveal">
+      <div class="section-badge">Features</div>
+      <h2 class="section-title">왜 HairLog인가요?</h2>
+      <p class="section-sub">
+        리뷰 쓰기 귀찮아서 포인트 날린 적 있으시죠?<br />
+        이제 3번 클릭으로 자연스러운 리뷰를 완성하세요.
+      </p>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card reveal">
+        <div class="feature-icon">✅</div>
+        <h3>간편한 선택형 입력</h3>
+        <p>직접 타이핑 없이 버튼만 클릭하면 끝. 시술, 디자이너, 만족 포인트를 빠르게 고르세요.</p>
+      </div>
+      <div class="feature-card reveal">
+        <div class="feature-icon">🤖</div>
+        <h3>Gemini AI 자동 생성</h3>
+        <p>Google의 최신 AI가 완전히 자연스러운 한국어 구어체 리뷰를 생성합니다. AI 느낌 없이.</p>
+      </div>
+      <div class="feature-card reveal">
+        <div class="feature-icon">💬</div>
+        <h3>내 스타일 말투 선택</h3>
+        <p>츤데레, 디테일, 친절, 단골 포스까지. 4가지 말투 중 나다운 리뷰를 골라보세요.</p>
+      </div>
+      <div class="feature-card reveal">
+        <div class="feature-icon">📋</div>
+        <h3>원클릭 복사 & 붙여넣기</h3>
+        <p>생성된 리뷰를 바로 복사해 예약 리뷰에 붙여넣으면 끝. 포인트 적립도 놓치지 마세요.</p>
+      </div>
+      <div class="feature-card reveal">
+        <div class="feature-icon">🔄</div>
+        <h3>마음에 안 들면 재생성</h3>
+        <p>생성된 리뷰가 마음에 안 들면 버튼 하나로 다른 버전을 즉시 만들어 드립니다.</p>
+      </div>
+      <div class="feature-card reveal">
+        <div class="feature-icon">📱</div>
+        <h3>모바일 최적화</h3>
+        <p>미용실에서 바로, 스마트폰으로 30초 만에. 앱 설치 없이 브라우저에서 바로 사용.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section id="how">
+    <div class="how-steps">
+      <div class="reveal">
+        <div class="section-badge">How it works</div>
+        <h2 class="section-title">딱 4단계면<br />충분합니다</h2>
+        <p class="section-sub" style="margin-bottom:2.5rem">
+          복잡한 설정 없이 선택만 하면 AI가 알아서 자연스러운 리뷰를 완성해 줍니다.
+        </p>
+      </div>
+      <div class="how-step reveal">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <h4>어떤 시술 받으셨나요?</h4>
+          <p>컷트, 펌, 염색, 클리닉 중 받은 시술을 선택하세요. 복수 선택 가능합니다.</p>
+        </div>
+      </div>
+      <div class="how-step reveal">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <h4>어떤 분께 받으셨나요?</h4>
+          <p>원장님, 실장님, 디자이너님 중 선택하거나 직접 이름을 입력하세요.</p>
+        </div>
+      </div>
+      <div class="how-step reveal">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <h4>어떤 점이 좋았나요?</h4>
+          <p>손이 빨라요, 친절해요, 스타일 추천 등 만족 포인트를 최대 3개 고르세요.</p>
+        </div>
+      </div>
+      <div class="how-step reveal">
+        <div class="step-num">4</div>
+        <div class="step-content">
+          <h4>말투를 골라주세요</h4>
+          <p>4가지 말투 스타일 중 하나를 선택하면 AI가 즉시 리뷰를 생성합니다.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="how-visual reveal">
+      <div class="how-card">
+        <div class="how-card-icon">✂️</div>
+        <div class="how-card-text">
+          <div class="label">Step 1 · 시술</div>
+          <div class="how-card-chips">
+            <div class="how-chip">컷트</div>
+            <div class="how-chip">다운펌</div>
+            <div class="how-chip gray">염색</div>
+            <div class="how-chip gray">클리닉</div>
+          </div>
+        </div>
+      </div>
+      <div class="arrow-line"></div>
+      <div class="how-card">
+        <div class="how-card-icon">👤</div>
+        <div class="how-card-text">
+          <div class="label">Step 2 · 디자이너</div>
+          <div class="how-card-chips">
+            <div class="how-chip">실장님</div>
+            <div class="how-chip gray">원장님</div>
+            <div class="how-chip gray">디자이너님</div>
+          </div>
+        </div>
+      </div>
+      <div class="arrow-line"></div>
+      <div class="how-card">
+        <div class="how-card-icon">👍</div>
+        <div class="how-card-text">
+          <div class="label">Step 3 · 만족 포인트</div>
+          <div class="how-card-chips">
+            <div class="how-chip">라인이 깔끔해요</div>
+            <div class="how-chip">손이 빨라요</div>
+            <div class="how-chip gray">친절해요</div>
+          </div>
+        </div>
+      </div>
+      <div class="arrow-line"></div>
+      <div class="how-card">
+        <div class="how-card-icon">💬</div>
+        <div class="how-card-text">
+          <div class="label">Step 4 · 말투</div>
+          <div class="how-card-chips">
+            <div class="how-chip">츤데레형</div>
+            <div class="how-chip gray">디테일형</div>
+            <div class="how-chip gray">친절형</div>
+          </div>
+        </div>
+      </div>
+      <div class="arrow-line"></div>
+      <div class="how-card" style="border-color: rgba(52,211,153,0.3); background: rgba(52,211,153,0.05);">
+        <div class="how-card-icon">✨</div>
+        <div class="how-card-text">
+          <div class="label" style="color: var(--green);">완성된 리뷰</div>
+          <div class="value" style="font-size:0.8rem; color: var(--text-muted); margin-top:0.3rem; line-height:1.6;">
+            "컷트 + 다운펌 맡겼는데 라인 진짜 깔끔하게 잡아줌. 실장님 손 빠르고 결과도 좋음. 정착각이다."
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TONES -->
+  <section id="tones">
+    <div class="tones-header reveal">
+      <div class="section-badge">Tone Styles</div>
+      <h2 class="section-title">나다운 말투로<br />자연스럽게</h2>
+      <p class="section-sub" style="margin:0 auto 0">
+        AI가 생성하지만 내가 쓴 것처럼 들려야 하니까요.<br />
+        4가지 말투 스타일 중 하나를 골라보세요.
+      </p>
+    </div>
+    <div style="margin-top: 3.5rem;">
+      <div class="tones-grid">
+        <div class="tone-card reveal">
+          <span class="tone-emoji">😤</span>
+          <div class="tone-name">츤데레형</div>
+          <div class="tone-desc">말 길게 안 함. 결과만 말함.</div>
+          <div class="tone-sample">"컷트 + 다운펌. 라인 깔끔. 다음에도 실장님한테 맡길 듯."</div>
+        </div>
+        <div class="tone-card reveal">
+          <span class="tone-emoji">📋</span>
+          <div class="tone-name">디테일형</div>
+          <div class="tone-desc">꼼꼼하게 설명해 주는 타입.</div>
+          <div class="tone-sample">"이번에 컷트랑 다운펌 받았는데, 실장님이 두상 형태에 맞게 라인을 잡아주셔서 결과물이 매우 만족스러웠어요."</div>
+        </div>
+        <div class="tone-card reveal">
+          <span class="tone-emoji">😊</span>
+          <div class="tone-name">친절형</div>
+          <div class="tone-desc">이모티콘도 섞고 따뜻한 타입.</div>
+          <div class="tone-sample">"오늘 컷트 + 다운펌 받았는데 너무 만족스러워요 😊 실장님 라인 진짜 깔끔하게 잡아주셨어요!"</div>
+        </div>
+        <div class="tone-card reveal">
+          <span class="tone-emoji">👑</span>
+          <div class="tone-name">단골포스형</div>
+          <div class="tone-desc">오래 다닌 느낌.</div>
+          <div class="tone-sample">"여기 단골인데 이번에도 실장님한테 맡겼죠. 컷트 + 다운펌 조합으로 했는데 역시 라인 하나는 진짜 잘 잡아줌."</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <div class="cta-section">
+    <div class="cta-card reveal">
+      <h2>
+        오늘 머리 마음에 드셨나요?<br />
+        <span style="background: linear-gradient(135deg, var(--green), var(--cyan)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+          리뷰 쓰고 포인트 챙겨가세요
+        </span>
+      </h2>
+      <p>
+        3번 클릭, 30초면 끝.<br />
+        자연스러운 리뷰로 포인트 적립도 놓치지 마세요.
+      </p>
+      <a href="../" class="btn-primary" style="display:inline-flex; font-size:1.05rem; padding:1rem 2.5rem;">
+        ✂️ 지금 바로 시작하기
+      </a>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-logo">
+        <div class="footer-logo-icon">✂️</div>
+        <span>HairLog</span>
+      </div>
+      <div class="footer-copy">© 2025 HairLog. All rights reserved.</div>
+      <div class="footer-tag">#바이브코딩 #AI리뷰 #미용실리뷰</div>
+    </div>
+  </footer>
+
+  <!-- COMING SOON MODAL -->
+  <div id="coming-modal" style="
+    display:none; position:fixed; inset:0; z-index:999;
+    background:rgba(0,0,0,0.7); backdrop-filter:blur(6px);
+    align-items:center; justify-content:center; padding:1.5rem;
+  " onclick="hideComingSoon(event)">
+    <div style="
+      background:#18181b; border:1px solid rgba(52,211,153,0.25);
+      border-radius:1.5rem; padding:2.5rem 2rem; max-width:360px; width:100%;
+      text-align:center; position:relative;
+      box-shadow:0 0 60px rgba(52,211,153,0.12), 0 30px 80px rgba(0,0,0,0.5);
+      animation: modalIn 0.25s ease both;
+    " onclick="event.stopPropagation()">
+      <div style="font-size:2.5rem; margin-bottom:1rem;">🚧</div>
+      <h3 style="font-size:1.3rem; font-weight:900; letter-spacing:-0.02em; margin-bottom:0.6rem;">준비 중입니다</h3>
+      <p style="font-size:0.9rem; color:#a1a1aa; line-height:1.7; margin-bottom:2rem;">
+        서비스 오픈을 준비하고 있어요.<br />조금만 기다려 주세요!
+      </p>
+      <button onclick="hideComingSoon()" style="
+        width:100%; padding:0.875rem;
+        background:#34d399; color:#000;
+        border:none; border-radius:999px;
+        font-weight:800; font-size:0.95rem; cursor:pointer;
+        transition:opacity 0.2s;
+      " onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">확인</button>
+    </div>
+  </div>
+  <style>
+    @keyframes modalIn {
+      from { opacity:0; transform:scale(0.92) translateY(12px); }
+      to   { opacity:1; transform:scale(1) translateY(0); }
+    }
+  </style>
+
+  <script>
+    function showComingSoon(e) {
+      if (e) e.preventDefault();
+      const modal = document.getElementById('coming-modal');
+      modal.style.display = 'flex';
+    }
+    function hideComingSoon(e) {
+      if (e && e.target !== document.getElementById('coming-modal')) return;
+      document.getElementById('coming-modal').style.display = 'none';
+    }
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') document.getElementById('coming-modal').style.display = 'none'; });
+  </script>
+
+  <script>
+    const observer = new IntersectionObserver(
+      (entries) => entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } }),
+      { threshold: 0.1, rootMargin: '0px 0px -30px 0px' }
+    );
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+    // Ensure above-fold elements are immediately visible
+    window.addEventListener('load', () => {
+      document.querySelectorAll('.reveal').forEach(el => {
+        const rect = el.getBoundingClientRect();
+        if (rect.top < window.innerHeight) el.classList.add('visible');
+      });
+    });
+  </script>
+</body>
 </html>
